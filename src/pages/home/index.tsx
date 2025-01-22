@@ -8,11 +8,11 @@ import {
   Modal,
 } from "react-native";
 import Slider from "@react-native-community/slider";
-import { ModalPassword } from "@/components/modalPassword";
+import { ModalPassword } from "../../components/modalPassword/index";
 
 let charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-export default function Index() {
+export function Home() {
   const [size, setSize] = useState(10);
   const [passwordValue, setPasswrodValue] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -31,7 +31,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <Image
-        source={require("../assets/images/logo.png")}
+        source={require("../../assets/images/logo.png")}
         style={styles.logo}
       />
       <Text style={styles.title}>{size} Caracteres</Text>
