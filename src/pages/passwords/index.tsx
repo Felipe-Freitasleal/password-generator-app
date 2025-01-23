@@ -6,12 +6,17 @@ import useStorage from "@/hooks/useStorage";
 import { PasswordItem } from "../../components/passwordItem/index";
 
 export function Password() {
-  const [listPasswords, setListPasswords] = useState([]);
+  const [listPasswords, setListPasswords] = useState<
+    {
+      id: string;
+      senha: string;
+    }[]
+  >([]);
   const focused = useIsFocused();
   const { getItem, removeItem } = useStorage();
 
   async function loadPasswords() {
-    const passwords = await getItem("@pass");
+    const passwords = await getItem();
 
     setListPasswords(passwords);
   }
@@ -20,16 +25,16 @@ export function Password() {
     loadPasswords();
   }, [focused]);
 
-  async function handleDeletePassword(item: any) {
-    const passwords = await removeItem("@pass", item);
-
-    setListPasswords(passwords);
+  async function handleDeletePassword(item: { id: string; senha: string }) {
+    await removeItem(item.id);
+    alert("Senha removida com sucesso!");
+    loadPasswords();
   }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.header}>
-        <Text style={styles.title}>Testeeeee</Text>
+        <Text style={styles.title}>Suas Senhas</Text>
       </View>
 
       <View style={styles.content}>
@@ -37,12 +42,12 @@ export function Password() {
           style={{ flex: 1, paddingTop: 14 }}
           data={listPasswords}
           keyExtractor={(item) => {
-            return String(item);
+            return String(item.id);
           }}
           renderItem={({ item }) => {
             return (
               <PasswordItem
-                data={item}
+                data={item.senha}
                 removePassword={() => handleDeletePassword(item)}
               />
             );
