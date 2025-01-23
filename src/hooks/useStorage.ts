@@ -1,41 +1,52 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useSQLiteContext } from "expo-sqlite";
+import { uuidGenerator } from "@/utils/uuidGenerator";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const useStorage = () => {
-  const getItem = async (key: any) => {
-    try {
-      const passwords: any = await AsyncStorage.getItem(key);
+  const database = useSQLiteContext();
 
-      return JSON.parse(passwords) || [];
+  const salveItem = async (password: string) => {
+    const passwordId = uuidGenerator();
+
+    const statement = await database.prepareAsync(
+      "INSERT INTO senhas (id, senha) VALUES ($id, $senha)"
+    );
+
+    try {
+      await statement.executeAsync({
+        $id: passwordId,
+        $senha: password,
+      });
+
+      await database.getAllAsync(
+        "INSERT INTO senhas (id, senha) VALUES ($id, $senha)"
+      );
+    } catch (error) {
+      throw error;
+    } finally {
+      await statement.finalizeAsync();
+    }
+  };
+
+  const getItem = async () => {
+    try {
+      const result: {
+        id: string;
+        senha: string;
+      }[] = await database.getAllAsync("SELECT * FROM senhas");
+
+      return result;
     } catch (error) {
       console.log("Erro ao buscar: ", error);
       return [];
     }
   };
 
-  const salveItem = async (key: any, value: any) => {
+  const removeItem = async (id: string) => {
     try {
-      let passwords = await getItem(key);
+      const query = "DELETE FROM senhas WHERE id = ?";
 
-      passwords.push(value);
-
-      await AsyncStorage.setItem(key, JSON.stringify(passwords));
-    } catch (error) {
-      console.log("Erro ao salvar: ", error);
-      return [];
-    }
-  };
-
-  const removeItem = async (key: any, item: any) => {
-    try {
-      let passwords = await getItem(key);
-
-      let myPassword = passwords.filter((password: any) => {
-        return password !== item;
-      });
-
-      await AsyncStorage.setItem(key, JSON.stringify(myPassword));
-
-      return myPassword;
+      await database.getAllAsync(query, [id]);
     } catch (error) {
       console.log("Erro ao excluir: ", error);
       return [];
